@@ -53,12 +53,12 @@ def fetch_joker_data(url, asList=False):
         image_url = cells[1].find_all("a")[0].find('img').get('data-src') or cells[1].find_all("a")[0].find('img').get('src')
 
         joker_data = {
-            "Name": name_tag.text.strip() if name_tag else None,
-            "Image_URL": image_url,
-            "Effect": cells[2].text.strip(),
-            "Cost": cells[3].text.strip(),
-            "Rarity": cells[4].text.strip(),
-            "Type": cells[6].text.strip(),
+            "name": name_tag.text.strip() if name_tag else None,
+            "image": image_url,
+            "effect": cells[2].text.strip(),
+            "cost": cells[3].text.strip(),
+            "rarity": cells[4].text.strip(),
+            "type": cells[6].text.strip(),
         }
         names.append(name_tag.text.strip())
         rows.append(joker_data)
@@ -73,10 +73,11 @@ def fetch_joker_data(url, asList=False):
         '...': 'Retrigger',
         '+$': 'Economy'
     }
-    rows['Type'] = rows['Type'].map(type_dict)
+    rows['type'] = rows['type'].map(type_dict)
+    df = rows.reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return rows.reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_deck_data(url, asList=False):
     """
@@ -119,9 +120,10 @@ def fetch_deck_data(url, asList=False):
         }
         rows.append(deck_data)
         names.append(name_tag.text.strip())
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_tarot_data(url, asList=False):
     """
@@ -154,7 +156,7 @@ def fetch_tarot_data(url, asList=False):
 
         # Extract the data
         image = cells[0].find('a').find('img').get('data-src') or cells[0].find('a').find('img').get('src')
-        name_tag = cells[1].find('a')
+        name_tag = cells[1].find('span')
         desc = cells[2]
 
         tarot_data = {
@@ -164,9 +166,10 @@ def fetch_tarot_data(url, asList=False):
         }
         rows.append(tarot_data)
         names.append(name_tag.text.strip())
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_planet_data(url, asList=False):
     """
@@ -214,9 +217,10 @@ def fetch_planet_data(url, asList=False):
         }
         rows.append(planet_data)
         names.append(name_tag.text.strip())
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_spectral_data(url, asList=False):
     """
@@ -260,9 +264,10 @@ def fetch_spectral_data(url, asList=False):
         }
         rows.append(spectral_data)
         names.append(name_tag.text.strip())
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_voucher_data(url, asList=False):
     """
@@ -288,7 +293,7 @@ def fetch_voucher_data(url, asList=False):
 
     rows = []
     names = []
-    for tr in voucher_table.find("tbody").find_all("tr")[2:]:  # Skip the header row
+    for tr in voucher_table[0].find("tbody").find_all("tr")[2:]:  # Skip the header row
         cells = tr.find_all("td")
         if len(cells) < 4:  # Ensure there are enough cells to process
             continue
@@ -301,20 +306,22 @@ def fetch_voucher_data(url, asList=False):
         name_tag_upg = cells[2] 
         desc_upg = cells[3]
 
-        voucher_data = {
-            'image_base': image_base,
-            'name_base': name_tag_base.text.strip(),
-            'description_base': desc_base.text.strip(),
-            'image_upg': image_upg,
-            'name_upg': name_tag_upg.text.strip(),
-            'description_upg': desc_upg.text.strip(),
+        voucher_data_base = {
+            'image': image_base,
+            'name': name_tag_base.text.strip(),
+            'description': desc_base.text.strip()
         }
-        rows.append(voucher_data)
-        names.append(name_tag_base.text.strip())
-        names.append(name_tag_upg.text.strip())
+        voucher_data_upg = {
+            'image': image_upg,
+            'name': name_tag_upg.text.strip(),
+            'description': desc_upg.text.strip(),
+        }
+        rows.append(voucher_data_base)
+        rows.append(voucher_data_upg)
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_modifier_data(url, idx, asList=False):
     """
@@ -349,21 +356,20 @@ def fetch_modifier_data(url, idx, asList=False):
 
         # Extract the data
         image = cells[0].find('a').find('img').get('data-src') or cells[0].find('a').find('img').get('src')
-        name_tag = cells[1].find('a')
+        name_tag = cells[1]
         desc = cells[2]
-        cost = cells[3].text.strip()
 
         enhancement_data = {
             'image': image,
             'name': name_tag.text.strip(),
-            'description': desc.text.strip(),
-            'cost': cost,
+            'description': desc.text.strip()
         }
         rows.append(enhancement_data)
         names.append(name_tag.text.strip())
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_stakes_data(url, asList=False):
     """
@@ -408,9 +414,10 @@ def fetch_stakes_data(url, asList=False):
         }
         rows.append(stake_data)
         names.append(name_tag.text.strip())
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_blinds_data(url, asList=False):
     """
@@ -459,9 +466,10 @@ def fetch_blinds_data(url, asList=False):
         }
         rows.append(blind_data)
         names.append(name_tag.text.strip())
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
 def fetch_tags_data(url, asList=False):
     """
@@ -496,7 +504,10 @@ def fetch_tags_data(url, asList=False):
         image = cells[0].find('a').find('img').get('data-src') or cells[0].find('a').find('img').get('src')
         name_tag = cells[1]
         desc = cells[2]
-        ante = cells[4]
+        try:
+            ante = cells[4]
+        except:
+            ante = cells[3]
 
         tag_data = {
             'image': image,
@@ -506,7 +517,8 @@ def fetch_tags_data(url, asList=False):
         }
         rows.append(tag_data)
         names.append(name_tag.text.strip())
+    df = (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
     if asList:
-        return names
-    return (pd.DataFrame(rows)).reset_index().rename(columns={'index': 'id'})
+        return df[['id','name']]
+    return df
 
