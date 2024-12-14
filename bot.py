@@ -34,6 +34,7 @@ intents.reactions = True
 intents.messages = True
 bot = commands.Bot(command_prefix="$", intents=intents)
 
+
 def find_closest_match(search_term):
         # Calculate the Levenshtein distance for each item in the dataframe
         category_names = SUB_URLS.keys()
@@ -50,7 +51,7 @@ def find_closest_match(search_term):
         return closest_matches[:min(5, len(closest_matches))] # Return the top 5 matches or less
 
 
-
+# TODO: Add command to fetch all the data while the bot loads to optimize search times. 
 @bot.event
 async def on_ready():
     print(f'Bot has connected to Discord!')
@@ -65,7 +66,7 @@ async def on_message(message):
     if message.author == bot.user:
         return
         # Define the regex patterns for the custom commands
-    pattern = re.compile(r'<<(.+?)>>') # Pattern for custom commands
+    pattern = re.compile(r'<(.+?)>') # Pattern for custom commands
 
     match = pattern.search(message.content)
     if match:
@@ -90,9 +91,7 @@ async def on_message(message):
                         desc = f'**Effect**: {data["effect"].values[0]}\n**Cost**: {data['cost'].values[0]}\n**Rarity**: {rarity}\n **Type**: {data["type"].values[0]}'
                     elif category == 'planets':
                         desc = f'**Addition**: {data["addition"].values[0]}\n**Hand**: {data["hand"].values[0]}\n**Hand Base Score**: {data["hand_base_score"].values[0]}'
-                print(rarity)
                 color = RARITY_COLORS.get(rarity.lower(), None)
-                print(color)
                 embed = discord.Embed(title=f"Item Details: {data['name'].values[0]}", color=color)
                 embed.add_field(name="Name", value=name, inline=False)
                 embed.add_field(name="Category", value=category.title(), inline=False)

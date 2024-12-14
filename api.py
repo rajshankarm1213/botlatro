@@ -199,6 +199,35 @@ def tags_id(id):
     tag_info = tag_data[tag_data['id'] == id]
     return tag_info
 
+@app.route('/all', methods=['GET'])
+def get_all():
+    url = BASE_URL + SUB_URLS['jokers']
+    joker_data = fetch_joker_data(url)
+    url = BASE_URL + SUB_URLS['decks']
+    deck_data = fetch_deck_data(url)
+    url = BASE_URL + SUB_URLS['tarot']
+    tarot_data = fetch_tarot_data(url)
+    url = BASE_URL + SUB_URLS['spectral']
+    spectral_data = fetch_spectral_data(url)
+    url = BASE_URL + SUB_URLS['planets']
+    planet_data = fetch_planet_data(url)
+    url = BASE_URL + SUB_URLS['vouchers']
+    voucher_data = fetch_voucher_data(url)
+    url = BASE_URL + SUB_URLS['enhancements']
+    enhancement_data = fetch_modifier_data(url, 0)
+    url = BASE_URL + SUB_URLS['editions']
+    edition_data = fetch_modifier_data(url, 1)
+    url = BASE_URL + SUB_URLS['seals']
+    seal_data = fetch_modifier_data(url, 2)
+    url = BASE_URL + SUB_URLS['stakes']
+    stake_data = fetch_stakes_data(url)
+    url = BASE_URL + SUB_URLS['blinds']
+    blind_data = fetch_blinds_data(url)
+    url = BASE_URL + SUB_URLS['tags']
+    tag_data = fetch_tags_data(url)
+    return joker_data, deck_data, tarot_data, spectral_data, planet_data, voucher_data, enhancement_data, edition_data, seal_data, stake_data, blind_data, tag_data
+
+
 # Run the app
 if __name__ == '__main__':
     app.run(debug=False)
